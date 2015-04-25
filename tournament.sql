@@ -11,71 +11,60 @@
 --     Matches (winner, loser)  -- can 2 players play each other > 1 time?
 --
 
-drop view  if exists CandidateMatches;
-drop view  if exists PlayerStandings;
-drop table if exists Matches;
-drop table if exists Players;
+DROP TABLE IF EXISTS Matches;
+DROP TABLE IF EXISTS Players;
+DROP TABLE IF EXISTS Tournaments;
 
-drop function if exists standings_difference(integer, integer);
+DROP FUNCTION IF EXISTS player_standings(INTEGER);
 
 
-create table Players (
-    id     serial  primary key,
-    name   text
+CREATE TABLE Tournaments(
+    id SERIAL PRIMARY KEY,
+    description TEXT
+);
+
+CREATE TABLE Players (
+    id            SERIAL PRIMARY KEY,
+    name          TEXT,
+    tournament_id INTEGER REFERENCES Tournaments (id)
 );
 
 
-create table Matches (
-    winner integer references Players (id),
-    loser  integer references Players (id),
-    primary key (winner, loser)
+CREATE TABLE Matches (
+    id            SERIAL PRIMARY KEY,
+    tournament_id INTEGER REFERENCES Tournaments (id),
+    round         INTEGER,
+    winner        INTEGER References Players (id),
+    loser         INTEGER References Players (id),
+
+    -- players can only play each other once in a tournament
+    UNIQUE (tournament_id, winner, loser),
+    UNIQUE (tournament_id, loser,  winner)
 );
 
 
-create view PlayerStandings as
-    -- returns players with most wins first
-    select id,
-           name,
+CREATE FUNCTION player_standings(tournament_id INTEGER)
+RETURNS TABLE(player_id INTEGER, player_name TEXT,
+              wins INTEGER, losses INTEGER, matches INTEGER) AS $$
+    -- returns player in the specified tournament with most wins first
 
-           (select count(winner) from Matches
-            where winner = id)                as wins,
+    SELECT 
+        id                                  AS player_id,
+        name                                AS player_name,
 
-           (select count(loser) from Matches
-            where loser = id)                 as losses,
+        (SELECT count(winner)::int FROM Matches
+          WHERE winner = Players.id)        AS wins,
 
-           (select count(*) from Matches
-            where winner = id or loser = id)  as matches
+        (SELECT count(loser)::int FROM Matches
+          WHERE loser = Players.id)         AS losses,
 
-    from Players
-    order by wins desc, id asc;
-           
+        (SELECT count(*)::int FROM Matches
+          WHERE winner = Players.id
+             OR loser = Players.id)         AS matches
 
-create function standings_difference(player1 integer, player2 integer) 
-returns integer as $$
-    select abs((select wins from PlayerStandings where id = player1) -
-               (select wins from PlayerStandings where id = player2))::int;
-$$ language sql;
+    FROM Players
+    WHERE Players.tournament_id = $1 -- tournament_id input parameter
+    ORDER BY wins DESC, player_id ASC;
 
+$$ LANGUAGE SQL;
 
-create view CandidateMatches as
-    -- List all possible matches for next round
-    --     - Return the 2 players and their difference in the standings
-    -- Restrictions:
-    --     - A player cannot play his/her self
-    --     - A pair only appears once -- if (p1,p2) exists, suppress (p2,p1).
-    --     - A player cannot play the same player a second time
-
-    select p1.id   as id1,
-           p1.name as name1, 
-           p2.id   as id2, 
-           p2.name as name2,
-           standings_difference(p1.id, p2.id) as ranking_difference
-    from Players as p1 
-          cross join Players as p2
-    where p1.id < p2.id -- eliminate  (id1, id1) -- same player
-                        -- keep only one of [(id1, id2), (id2, id1)]
-          -- eliminate players who have already played each other
-      and not exists(select 1 from Matches
-                     where (winner = p1.id and loser = p2.id)
-                        or (winner = p2.id and loser = p1.id))
-    order by ranking_difference asc, id1 asc;
