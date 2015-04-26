@@ -43,20 +43,36 @@ CREATE TABLE Matches (
 );
 
 
-CREATE FUNCTION player_standings(tournament_id INTEGER)
+CREATE OR REPLACE FUNCTION player_wins(tournament_id INTEGER, player_id INTEGER)
+RETURNS INTEGER AS $$
+    SELECT count(winner)::int 
+      FROM Matches
+     WHERE Matches.tournament_id = $1 -- input tournament_id
+       AND winner = player_id
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION opponent_wins(tournament_id INTEGER,
+                                         player_id INTEGER)
+RETURNS INTEGER AS $$
+    SELECT count(player_wins(tournament_id, loser))
+      FROM Matches
+     WHERE Matches.tournament_id = $1 
+       AND winner = player_id
+$$ LANGUAGE SQL;
+
+
+CREATE OR REPLACE FUNCTION player_standings(tournament_id INTEGER)
 RETURNS TABLE(player_id INTEGER, player_name TEXT,
-              wins INTEGER, losses INTEGER, matches INTEGER) AS $$
+              wins INTEGER, matches INTEGER) AS $$
     -- returns player in the specified tournament with most wins first
+    -- tie breaker is opponent match wins
 
     SELECT 
         id                                  AS player_id,
         name                                AS player_name,
-
-        (SELECT count(winner)::int FROM Matches
-          WHERE winner = Players.id)        AS wins,
-
-        (SELECT count(loser)::int FROM Matches
-          WHERE loser = Players.id)         AS losses,
+        player_wins(tournament_id, id)      AS wins,
+        opponent_wins(tournament_id, id)    AS opponent_wins,
 
         (SELECT count(*)::int FROM Matches
           WHERE winner = Players.id
@@ -64,7 +80,7 @@ RETURNS TABLE(player_id INTEGER, player_name TEXT,
 
     FROM Players
     WHERE Players.tournament_id = $1 -- tournament_id input parameter
-    ORDER BY wins DESC, player_id ASC;
+    ORDER BY wins DESC, opponent_wins DESC;
 
 $$ LANGUAGE SQL;
 
