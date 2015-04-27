@@ -129,6 +129,95 @@ def testPairings(tournament_id):
     print "8. After one match, players with one win are paired."
 
 
+def standingsWithOpponentWins(tournament_id):
+    conn = connect()
+    cur = conn.cursor()
+    sql = """SELECT player_id, player_name, wins, opponent_wins, matches
+             FROM player_standings(%s)"""
+    cur.execute(sql, (tournament_id,))
+    standings = cur.fetchall()
+    conn.close()
+
+    return standings
+
+
+def printStandings(tournament_id):
+    standings = standingsWithOpponentWins(tournament_id)
+
+    columns1 = ["Player", "", "", "Opponent", "Total"]
+    columns2 = ["Id", "Name", "Wins", "Wins", "Matches"]
+    row_format = "{:^6}{:^20}{:^7}{:^10}{:^8}"
+    print row_format.format(*columns1)
+    print row_format.format(*columns2)
+    print "-" * (6 + 20 + 7 + 10 + 8)
+
+    for row in standings:
+        print row_format.format(*row)
+
+
+def testOpponentWins4Players(tournament_id):
+    deleteMatches(tournament_id)
+    deletePlayers(tournament_id)
+    registerPlayer(tournament_id, "Twilight Sparkle")
+    registerPlayer(tournament_id, "Fluttershy")
+    registerPlayer(tournament_id, "Applejack")
+    registerPlayer(tournament_id, "Pinkie Pie")
+
+    pairings = swissPairings(tournament_id)
+    id1 = pairings[0][0]
+    id2 = pairings[0][2]
+    id3 = pairings[1][0]
+    id4 = pairings[1][2]
+
+    round = 1
+    reportMatch(tournament_id, round, id1, id2)
+    reportMatch(tournament_id, round, id3, id4)
+
+    standings = standingsWithOpponentWins(tournament_id)
+    for player in standings:
+        opponent_wins = player[3]
+        if opponent_wins != 0:
+            raise ValueError(
+                "After one match, all opponent wins should be zero.")
+    print "9a. After one match, opponent wins are zero for all players"
+
+    print
+    line_length = 6 + 20 + 7 + 10 + 8
+    heading_format = "{:^" + str(line_length) + "}"
+    heading = ["STANDINGS AFTER ROUND 1"]
+    print heading_format.format(*heading)
+    printStandings(tournament_id)
+
+    pairings = swissPairings(tournament_id)
+    id1 = pairings[0][0]
+    id2 = pairings[0][2]
+    id3 = pairings[1][0]
+    id4 = pairings[1][2]
+
+    round = 2
+    reportMatch(tournament_id, round, id1, id2)
+    reportMatch(tournament_id, round, id3, id4)
+
+    standings = standingsWithOpponentWins(tournament_id)
+    for i, player in enumerate(standings):
+        opponent_wins = player[3]
+        if i == 0 and opponent_wins != 2:
+            raise ValueError(
+                "After 2 matches, top player opponent wins should be zero.")
+        if i != 0 and opponent_wins != 0:
+            raise ValueError(
+                "After two matches, all opponent wins should be zero except for top player.")
+    print "9b. After two matches, top player has 2 opponent wins."
+    print "    Opponent wins are zero for all other players"
+
+    print
+    line_length = 6 + 20 + 7 + 10 + 8
+    heading_format = "{:^" + str(line_length) + "}"
+    heading = ["STANDINGS AFTER ROUND 1"]
+    print heading_format.format(*heading)
+    printStandings(tournament_id)
+
+
 if __name__ == '__main__':
     # 1 tournament in database
 
@@ -144,3 +233,6 @@ if __name__ == '__main__':
     testPairings(tournament_id)
     print "Success!  All tests for single tournament pass!"
 
+    print
+    print "Testing Opponent wins -- 4 player tournament"
+    testOpponentWins4Players(tournament_id)

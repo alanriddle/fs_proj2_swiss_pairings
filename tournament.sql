@@ -55,7 +55,7 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION opponent_wins(tournament_id INTEGER,
                                          player_id INTEGER)
 RETURNS INTEGER AS $$
-    SELECT count(player_wins(tournament_id, loser))
+    SELECT COALESCE(sum(player_wins(tournament_id, loser))::int, 0)
       FROM Matches
      WHERE Matches.tournament_id = $1 
        AND winner = player_id
@@ -63,8 +63,8 @@ $$ LANGUAGE SQL;
 
 
 CREATE OR REPLACE FUNCTION player_standings(tournament_id INTEGER)
-RETURNS TABLE(player_id INTEGER, player_name TEXT,
-              wins INTEGER, matches INTEGER) AS $$
+RETURNS TABLE(player_id INTEGER, player_name TEXT, wins INTEGER,
+              opponent_wins INTEGER,  matches INTEGER) AS $$
     -- returns player in the specified tournament with most wins first
     -- tie breaker is opponent match wins
 

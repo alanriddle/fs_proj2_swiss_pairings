@@ -167,6 +167,5 @@ def swissPairings(tournament_id):
     pairings = make_pairings(standings)
     conn.close()
     
-    print 'pairings = ' + str(pairings)
     return pairings
 
