@@ -141,16 +141,25 @@ def standingsWithOpponentWins(tournament_id):
     return standings
 
 
-def printStandings(tournament_id):
-    standings = standingsWithOpponentWins(tournament_id)
+def printStandings(tournament_id, heading, column_widths):
+    """Print out a table of player standings."""
+
+    line_length = sum(column_widths)
+    heading_format = "{:^" + str(line_length) + "}"
+    print heading_format.format(*heading)
 
     columns1 = ["Player", "", "", "Opponent", "Total"]
     columns2 = ["Id", "Name", "Wins", "Wins", "Matches"]
-    row_format = "{:^6}{:^20}{:^7}{:^10}{:^8}"
+    row_format = ["{:^" + str(c) + "}" for c in column_widths]
+    row_format = "".join(row_format)
+
+    # Print out 2 row column headings and a row of '-'
     print row_format.format(*columns1)
     print row_format.format(*columns2)
-    print "-" * (6 + 20 + 7 + 10 + 8)
+    print "-" * line_length
 
+    # For each player in standings, print a row 
+    standings = standingsWithOpponentWins(tournament_id)
     for row in standings:
         print row_format.format(*row)
 
@@ -169,24 +178,23 @@ def testOpponentWins4Players(tournament_id):
     id3 = pairings[1][0]
     id4 = pairings[1][2]
 
+    # Play the first round
     round = 1
     reportMatch(tournament_id, round, id1, id2)
     reportMatch(tournament_id, round, id3, id4)
 
     standings = standingsWithOpponentWins(tournament_id)
-    for player in standings:
-        opponent_wins = player[3]
-        if opponent_wins != 0:
-            raise ValueError(
-                "After one match, all opponent wins should be zero.")
+    actual_opponent_wins = set([(s[0], s[3]) for s in standings])
+    expected_opponent_wins = set([(s[0], 0) for s in standings])
+    if actual_opponent_wins != expected_opponent_wins:
+        raise ValueError("After one match, all opponent wins should be zero.")
     print "9a. After one match, opponent wins are zero for all players"
 
-    print
-    line_length = 6 + 20 + 7 + 10 + 8
-    heading_format = "{:^" + str(line_length) + "}"
+    # print out table of standings after round 1
+    print        # blank line
+    column_widths = [6, 20, 7, 10, 8]
     heading = ["STANDINGS AFTER ROUND 1"]
-    print heading_format.format(*heading)
-    printStandings(tournament_id)
+    printStandings(tournament_id, heading, column_widths)
 
     pairings = swissPairings(tournament_id)
     id1 = pairings[0][0]
@@ -194,28 +202,29 @@ def testOpponentWins4Players(tournament_id):
     id3 = pairings[1][0]
     id4 = pairings[1][2]
 
+    # Play the second round
     round = 2
     reportMatch(tournament_id, round, id1, id2)
     reportMatch(tournament_id, round, id3, id4)
 
     standings = standingsWithOpponentWins(tournament_id)
-    for i, player in enumerate(standings):
-        opponent_wins = player[3]
-        if i == 0 and opponent_wins != 2:
-            raise ValueError(
-                "After 2 matches, top player opponent wins should be zero.")
-        if i != 0 and opponent_wins != 0:
-            raise ValueError(
-                "After two matches, all opponent wins should be zero except for top player.")
-    print "9b. After two matches, top player has 2 opponent wins."
+    actual_opponent_wins = set([(s[0], s[3]) for s in standings])
+    # top player opponent wins is 2
+    # others are all zero -- only counts opponent wins for opponents player defeated
+    expected_opponent_wins = (set([(standings[0][0], 2)]) |
+                              set([(s[0], 0) for s in standings[1:]]))
+
+    # print out table of standings after round 2
+    print        # blank line
+    if actual_opponent_wins != expected_opponent_wins:
+        raise ValueError("After two matches, top player opponent wins is 2."
+                         "All other opponent wins should be zero.")
+    print "9a. After two matches, top player opponent wins is 2."
     print "    Opponent wins are zero for all other players"
 
     print
-    line_length = 6 + 20 + 7 + 10 + 8
-    heading_format = "{:^" + str(line_length) + "}"
-    heading = ["STANDINGS AFTER ROUND 1"]
-    print heading_format.format(*heading)
-    printStandings(tournament_id)
+    heading = ["STANDINGS AFTER ROUND 2"]
+    printStandings(tournament_id, heading, column_widths)
 
 
 if __name__ == '__main__':
