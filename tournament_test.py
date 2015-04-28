@@ -165,8 +165,19 @@ def printStandings(tournament_id, heading, column_widths):
 
 
 def testOpponentWins4Players(tournament_id):
+    """
+    Play a tournament with 4 players for 2 rounds.
+
+    Verify the opponent match wins are calculated correctly.
+    Here the opponent match wins for a player X is equal to
+    the sum of the wins for all opponents that player X 
+    defeated. Wins for opponents who defeated player X are
+    not counted.
+    """
+
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
+
     registerPlayer(tournament_id, "Twilight Sparkle")
     registerPlayer(tournament_id, "Fluttershy")
     registerPlayer(tournament_id, "Applejack")
@@ -184,8 +195,9 @@ def testOpponentWins4Players(tournament_id):
     reportMatch(tournament_id, round, id3, id4)
 
     standings = standingsWithOpponentWins(tournament_id)
-    actual_opponent_wins = set([(s[0], s[3]) for s in standings])
-    expected_opponent_wins = set([(s[0], 0) for s in standings])
+    actual_opponent_wins   = set([(s[0], s[3]) for s in standings])
+    expected_opponent_wins = set([(s[0],    0) for s in standings])
+
     if actual_opponent_wins != expected_opponent_wins:
         raise ValueError("After one match, all opponent wins should be zero.")
     print "9a. After one match, opponent wins are zero for all players"
