@@ -20,22 +20,23 @@ DROP FUNCTION IF EXISTS player_standings(INTEGER);
 
 CREATE TABLE Tournaments(
     id SERIAL PRIMARY KEY,
-    description TEXT
+    description TEXT NOT NULL
 );
+
 
 CREATE TABLE Players (
     id            SERIAL PRIMARY KEY,
-    name          TEXT,
-    tournament_id INTEGER REFERENCES Tournaments (id)
+    name          TEXT NOT NULL,
+    tournament_id INTEGER REFERENCES Tournaments (id) NOT NULL
 );
 
 
 CREATE TABLE Matches (
     id            SERIAL PRIMARY KEY,
-    tournament_id INTEGER REFERENCES Tournaments (id),
-    round         INTEGER,
-    winner        INTEGER References Players (id),
-    loser         INTEGER References Players (id),
+    tournament_id INTEGER REFERENCES Tournaments (id) NOT NULL,
+    round         INTEGER NOT NULL,
+    winner        INTEGER References Players (id) NOT NULL,
+    loser         INTEGER References Players (id) NOT NULL,
 
     -- players can only play each other once in a tournament
     UNIQUE (tournament_id, winner, loser),
