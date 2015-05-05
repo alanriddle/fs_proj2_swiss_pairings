@@ -45,7 +45,7 @@ def deletePlayers(tournament_id):
     """
     conn = connect()
     cur = conn.cursor()
-    sql = "DELETE FROM Players WHERE tournament_id = (%s)"
+    sql = "DELETE FROM PlayersInTournaments WHERE tournament_id = (%s)"
     cur.execute(sql, (tournament_id,))
     conn.commit()
     conn.close()
@@ -55,27 +55,46 @@ def countPlayers(tournament_id):
     """Returns the number of players currently registered in tournament."""
     conn = connect()
     cur = conn.cursor()
-    sql = "SELECT count(*) FROM players WHERE tournament_id = (%s)"
+    sql = "SELECT count(*) FROM PlayersInTournaments WHERE tournament_id = (%s)"
     cur.execute(sql, (tournament_id,))
     player_count = cur.fetchone()[0]
     conn.close()
     return player_count
 
-def registerPlayer(tournament_id, name):
+
+def registerPlayerInDatabase(name):
     """
-    Adds a player to the tournament database for the the specified tournament.
-  
-    The database assigns a unique serial id number for the player.  (This
-    should be handled by your SQL database schema, not in your Python code.)
-  
+    Adds a player to the Player table and returns the player id.
+
+    Note: To enter the player in a tournament, you will need to
+          call enterPlayerInTournament(tournament_id, player_id).
+
     Args:
-      tournament_id: id of tournament
-      name: the player's full name (need not be unique).
+        name: the name of the player
     """
     conn = connect()
     cur = conn.cursor()
-    cur.execute("insert into Players (tournament_id, name) values (%s, %s)", 
-                (tournament_id, name,))
+    cur.execute("INSERT INTO Players (name) values (%s) RETURNING id", 
+                (name,))
+    player_id = cur.fetchone()[0]
+    conn.commit()
+    conn.close()
+
+    return player_id
+
+
+def enterPlayerInTournament(tournament_id, player_id):
+    """
+    Adds a player for the the specified tournament.
+  
+    Args:
+      tournament_id: id of tournament
+      player_id: the player's id
+    """
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO PlayersInTournaments (tournament_id, player_id) values (%s, %s)", 
+                (tournament_id, player_id,))
     conn.commit()
     conn.close()
 

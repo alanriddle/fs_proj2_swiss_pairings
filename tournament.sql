@@ -11,6 +11,7 @@
 --     Matches (winner, loser)  -- can 2 players play each other > 1 time?
 --
 
+DROP TABLE IF EXISTS PlayersInTournaments;
 DROP TABLE IF EXISTS Matches;
 DROP TABLE IF EXISTS Players;
 DROP TABLE IF EXISTS Tournaments;
@@ -26,8 +27,7 @@ CREATE TABLE Tournaments(
 
 CREATE TABLE Players (
     id            SERIAL PRIMARY KEY,
-    name          TEXT NOT NULL,
-    tournament_id INTEGER REFERENCES Tournaments (id) NOT NULL
+    name          TEXT NOT NULL
 );
 
 
@@ -39,8 +39,15 @@ CREATE TABLE Matches (
     loser         INTEGER References Players (id) NOT NULL,
 
     -- players can only play each other once in a tournament
+    -- TODO - fix this - tournament_id, set(winner, loser) is UNIQUE
     UNIQUE (tournament_id, winner, loser),
     UNIQUE (tournament_id, loser,  winner)
+);
+
+
+CREATE TABLE PlayersInTournaments (
+    tournament_id INTEGER REFERENCES Tournaments (id) NOT NULL,
+    player_id     INTEGER REFERENCES Players (id) NOT NULL
 );
 
 
@@ -79,8 +86,10 @@ RETURNS TABLE(player_id INTEGER, player_name TEXT, wins INTEGER,
           WHERE winner = Players.id
              OR loser = Players.id)         AS matches
 
-    FROM Players
-    WHERE Players.tournament_id = $1 -- tournament_id input parameter
+    FROM PlayersInTournaments
+        JOIN Players
+            ON PlayersInTournaments.player_id = Players.id
+    WHERE PlayersInTournaments.tournament_id = $1 -- tournament_id input parameter
     ORDER BY wins DESC, opponent_wins DESC;
 
 $$ LANGUAGE SQL;

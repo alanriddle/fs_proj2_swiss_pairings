@@ -6,13 +6,13 @@ from tournament import *
 
 def testDeleteMatches(tournament_id):
     deleteMatches(tournament_id)
-    print "1. Old matches can be deleted."
+    print "1. Old matches for a tournament can be deleted."
 
 
 def testDelete(tournament_id):
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
-    print "2. Player records can be deleted."
+    print "2. Player records for a tournament can be deleted."
 
 
 def testCount(tournament_id):
@@ -30,7 +30,9 @@ def testCount(tournament_id):
 def testRegister(tournament_id):
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
-    registerPlayer(tournament_id, "Chandra Nalaar")
+    player_id = registerPlayerInDatabase("Chandra Nalaar")
+    enterPlayerInTournament(tournament_id, player_id)
+
     c = countPlayers(tournament_id)
     if c != 1:
         raise ValueError(
@@ -41,10 +43,16 @@ def testRegister(tournament_id):
 def testRegisterCountDelete(tournament_id):
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
-    registerPlayer(tournament_id, "Markov Chaney")
-    registerPlayer(tournament_id, "Joe Malik")
-    registerPlayer(tournament_id, "Mao Tsu-hsi")
-    registerPlayer(tournament_id, "Atlanta Hope")
+    mc = registerPlayerInDatabase("Markov Chaney")
+    jm = registerPlayerInDatabase("Joe Malik")
+    mt = registerPlayerInDatabase("Mao Tsu-hsi")
+    ah = registerPlayerInDatabase("Atlanta Hope")
+
+    enterPlayerInTournament(tournament_id, mc)
+    enterPlayerInTournament(tournament_id, jm)
+    enterPlayerInTournament(tournament_id, mt)
+    enterPlayerInTournament(tournament_id, ah)
+
     c = countPlayers(tournament_id)
     if c != 4:
         raise ValueError(
@@ -59,8 +67,12 @@ def testRegisterCountDelete(tournament_id):
 def testStandingsBeforeMatches(tournament_id):
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
-    registerPlayer(tournament_id, "Melpomene Murray")
-    registerPlayer(tournament_id, "Randy Schwartz")
+    mm = registerPlayerInDatabase("Melpomene Murray")
+    rs = registerPlayerInDatabase("Randy Schwartz")
+
+    enterPlayerInTournament(tournament_id, mm)
+    enterPlayerInTournament(tournament_id, rs)
+
     standings = playerStandings(tournament_id)
     if len(standings) < 2:
         raise ValueError("Players should appear in playerStandings even before "
@@ -82,10 +94,17 @@ def testStandingsBeforeMatches(tournament_id):
 def testReportMatches(tournament_id):
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
-    registerPlayer(tournament_id, "Bruno Walton")
-    registerPlayer(tournament_id, "Boots O'Neal")
-    registerPlayer(tournament_id, "Cathy Burton")
-    registerPlayer(tournament_id, "Diane Grant")
+
+    bw = registerPlayerInDatabase("Bruno Walton")
+    bo = registerPlayerInDatabase("Boots O'Neal")
+    cb = registerPlayerInDatabase("Cathy Burton")
+    dg = registerPlayerInDatabase("Diane Grant")
+
+    enterPlayerInTournament(tournament_id, bw)
+    enterPlayerInTournament(tournament_id, bo)
+    enterPlayerInTournament(tournament_id, cb)
+    enterPlayerInTournament(tournament_id, dg)
+
     standings = playerStandings(tournament_id)
     [id1, id2, id3, id4] = [row[0] for row in standings]
 
@@ -107,10 +126,17 @@ def testReportMatches(tournament_id):
 def testPairings(tournament_id):
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
-    registerPlayer(tournament_id, "Twilight Sparkle")
-    registerPlayer(tournament_id, "Fluttershy")
-    registerPlayer(tournament_id, "Applejack")
-    registerPlayer(tournament_id, "Pinkie Pie")
+
+    ts = registerPlayerInDatabase("Twilight Sparkle")
+    fs = registerPlayerInDatabase("Fluttershy")
+    aj = registerPlayerInDatabase("Applejack")
+    pp = registerPlayerInDatabase("Pinkie Pie")
+
+    enterPlayerInTournament(tournament_id, ts)
+    enterPlayerInTournament(tournament_id, fs)
+    enterPlayerInTournament(tournament_id, aj)
+    enterPlayerInTournament(tournament_id, pp)
+
     standings = playerStandings(tournament_id)
     [id1, id2, id3, id4] = [row[0] for row in standings]
     round = 1
@@ -178,10 +204,15 @@ def testOpponentWins4Players(tournament_id):
     deleteMatches(tournament_id)
     deletePlayers(tournament_id)
 
-    registerPlayer(tournament_id, "Twilight Sparkle")
-    registerPlayer(tournament_id, "Fluttershy")
-    registerPlayer(tournament_id, "Applejack")
-    registerPlayer(tournament_id, "Pinkie Pie")
+    ts = registerPlayerInDatabase("Twilight Sparkle")
+    fs = registerPlayerInDatabase("Fluttershy")
+    aj = registerPlayerInDatabase("Applejack")
+    pp = registerPlayerInDatabase("Pinkie Pie")
+
+    enterPlayerInTournament(tournament_id, ts)
+    enterPlayerInTournament(tournament_id, fs)
+    enterPlayerInTournament(tournament_id, aj)
+    enterPlayerInTournament(tournament_id, pp)
 
     pairings = swissPairings(tournament_id)
     id1 = pairings[0][0]
