@@ -20,8 +20,8 @@ DROP FUNCTION IF EXISTS player_standings(INTEGER);
 
 
 CREATE TABLE Tournaments(
-    id SERIAL PRIMARY KEY,
-    description TEXT NOT NULL
+    id            SERIAL PRIMARY KEY,
+    description   TEXT NOT NULL
 );
 
 
@@ -37,17 +37,14 @@ CREATE TABLE Matches (
     round         INTEGER NOT NULL,
     winner        INTEGER References Players (id) NOT NULL,
     loser         INTEGER References Players (id) NOT NULL,
-
-    -- players can only play each other once in a tournament
-    -- TODO - fix this - tournament_id, set(winner, loser) is UNIQUE
-    UNIQUE (tournament_id, winner, loser),
-    UNIQUE (tournament_id, loser,  winner)
+    CONSTRAINT matches_cannot_play_oneself CHECK (winner <> loser)
 );
 
 
 CREATE TABLE PlayersInTournaments (
     tournament_id INTEGER REFERENCES Tournaments (id) NOT NULL,
-    player_id     INTEGER REFERENCES Players (id) NOT NULL
+    player_id     INTEGER REFERENCES Players (id) NOT NULL,
+    PRIMARY KEY (tournament_id, player_id)
 );
 
 
@@ -63,6 +60,11 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION opponent_wins(tournament_id INTEGER,
                                          player_id INTEGER)
 RETURNS INTEGER AS $$
+    -- For each opponent player_id beat, sum up wins of the opponent.
+    -- If player_id lost to an opponent, do not sum up opponent wins.
+    -- Giving 'points' for beating a strong opponent.
+    -- Not giving 'points' for losing to a strong opponent.
+
     SELECT COALESCE(sum(player_wins(tournament_id, loser))::int, 0)
       FROM Matches
      WHERE Matches.tournament_id = $1 

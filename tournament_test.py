@@ -288,3 +288,4 @@ if __name__ == '__main__':
     print
     print "Testing Opponent wins -- 4 player tournament"
     testOpponentWins4Players(tournament_id)
+
