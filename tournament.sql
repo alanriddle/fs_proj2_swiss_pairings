@@ -37,7 +37,7 @@ CREATE TABLE Matches (
     round         INTEGER NOT NULL,
     winner        INTEGER References Players (id) NOT NULL,
     loser         INTEGER References Players (id) NOT NULL,
-    CONSTRAINT matches_cannot_play_oneself CHECK (winner <> loser)
+    CONSTRAINT matches_player_cannot_play_oneself CHECK (winner <> loser)
 );
 
 
@@ -50,6 +50,7 @@ CREATE TABLE PlayersInTournaments (
 
 CREATE OR REPLACE FUNCTION player_wins(tournament_id INTEGER, player_id INTEGER)
 RETURNS INTEGER AS $$
+    -- Count the number of matches won by player in specified tournament
     SELECT count(winner)::int 
       FROM Matches
      WHERE Matches.tournament_id = $1 -- input tournament_id

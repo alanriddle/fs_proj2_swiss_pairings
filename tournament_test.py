@@ -112,7 +112,7 @@ def testReportMatches(tournament_id):
     reportMatch(tournament_id, round, id1, id2)
     reportMatch(tournament_id, round, id3, id4)
     standings = playerStandings(tournament_id)
-    print 'standings = ' + str(standings)
+    
     for (i, n, w, m) in standings:
         if m != 1:
             raise ValueError("Each player should have one match recorded.")
@@ -266,7 +266,7 @@ def testOpponentWins4Players(tournament_id):
     if actual_opponent_wins != expected_opponent_wins:
         raise ValueError("Expected opponent wins after Round 2"
                          " do not match actual.")
-    print "9a. After two rounds, expected opponent wins equals"
+    print "9b. After two rounds, expected opponent wins equals"
     print "    actual opponent wins."
 
     print

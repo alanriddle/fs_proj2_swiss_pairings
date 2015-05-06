@@ -12,7 +12,7 @@ def connect():
 
 
 def createTournament(description):
-    """Create a record in the tournaments table."""
+    """Create a record in the tournaments table. Returns the id."""
     conn = connect()
     cur = conn.cursor()
     sql = """INSERT INTO Tournaments (description)
@@ -93,14 +93,17 @@ def enterPlayerInTournament(tournament_id, player_id):
     """
     conn = connect()
     cur = conn.cursor()
-    cur.execute("INSERT INTO PlayersInTournaments (tournament_id, player_id) values (%s, %s)", 
-                (tournament_id, player_id,))
+    sql = """INSERT INTO PlayersInTournaments (tournament_id, player_id)
+             VALUES (%s, %s)"""
+    cur.execute(sql, (tournament_id, player_id,))
     conn.commit()
     conn.close()
 
 
 def playerStandings(tournament_id):
-    """Returns a list of the players and their win records, sorted by wins.
+    """
+    Returns a list of the players and their win records, sorted by wins first,
+    then by opponent wins.
 
     The first entry in the list should be the player in first place, or a player
     tied for first place if there is currently a tie.
@@ -108,9 +111,9 @@ def playerStandings(tournament_id):
     Arg:
       Id of tournament
     Returns:
-      A list of tuples, each of which contains (id, name, wins, matches):
-        id: the player's unique id (assigned by the database)
-        name: the player's full name (as registered)
+      A list of tuples. Tuple like (player_id, player_name, wins, matches).
+        player_id: the player's unique id (assigned by the database)
+        player_name: the player's full name (as registered)
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
