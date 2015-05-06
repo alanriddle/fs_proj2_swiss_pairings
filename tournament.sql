@@ -60,15 +60,26 @@ $$ LANGUAGE SQL;
 CREATE OR REPLACE FUNCTION opponent_wins(tournament_id INTEGER,
                                          player_id INTEGER)
 RETURNS INTEGER AS $$
-    -- For each opponent player_id beat, sum up wins of the opponent.
-    -- If player_id lost to an opponent, do not sum up opponent wins.
-    -- Giving 'points' for beating a strong opponent.
-    -- Not giving 'points' for losing to a strong opponent.
+    -- Sum the wins of all the opponents for the specified player
+    -- in the specified tournament.
 
-    SELECT COALESCE(sum(player_wins(tournament_id, loser))::int, 0)
-      FROM Matches
-     WHERE Matches.tournament_id = $1 
-       AND winner = player_id
+    WITH opponents AS (
+        -- select opponents the player lost to
+        SELECT winner AS opponent
+          FROM Matches
+         WHERE Matches.tournament_id = $1
+           AND loser = player_id
+
+        UNION
+
+        -- select opponents the player defeated
+        SELECT loser AS opponent
+          FROM Matches
+         WHERE Matches.tournament_id = $1
+           AND winner = player_id
+    )
+    SELECT sum(player_wins(tournament_id, opponent))::int
+      FROM opponents;
 $$ LANGUAGE SQL;
 
 

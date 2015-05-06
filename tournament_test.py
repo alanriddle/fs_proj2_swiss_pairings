@@ -226,12 +226,16 @@ def testOpponentWins4Players(tournament_id):
     reportMatch(tournament_id, round, id3, id4)
 
     standings = standingsWithOpponentWins(tournament_id)
-    actual_opponent_wins   = set([(s[0], s[3]) for s in standings])
-    expected_opponent_wins = set([(s[0],    0) for s in standings])
+    actual_opponent_wins   = set([(p[0], p[3]) for p in standings])
+    s = standings
+    expected_opponent_wins = set([(s[0][0], 0), (s[1][0], 0),
+                                  (s[2][0], 1), (s[3][0], 1)])
 
     if actual_opponent_wins != expected_opponent_wins:
-        raise ValueError("After one match, all opponent wins should be zero.")
-    print "9a. After one match, opponent wins are zero for all players"
+       raise ValueError("Expected opponent wins after Round 1"
+                        "do not match actual.")
+    print "9a. After one round, expected opponent wins equals"
+    print "    actual opponent wins."
 
     # print out table of standings after round 1
     print        # blank line
@@ -254,16 +258,16 @@ def testOpponentWins4Players(tournament_id):
     actual_opponent_wins = set([(s[0], s[3]) for s in standings])
     # top player opponent wins is 2
     # others are all zero -- only counts opponent wins for opponents player defeated
-    expected_opponent_wins = (set([(standings[0][0], 2)]) |
-                              set([(s[0], 0) for s in standings[1:]]))
+    expected_opponent_wins = set([(s[0], 2) for s in standings])
+                              
 
     # print out table of standings after round 2
     print        # blank line
     if actual_opponent_wins != expected_opponent_wins:
-        raise ValueError("After two matches, top player opponent wins is 2."
-                         "All other opponent wins should be zero.")
-    print "9a. After two matches, top player opponent wins is 2."
-    print "    Opponent wins are zero for all other players"
+        raise ValueError("Expected opponent wins after Round 2"
+                         " do not match actual.")
+    print "9a. After two rounds, expected opponent wins equals"
+    print "    actual opponent wins."
 
     print
     heading = ["STANDINGS AFTER ROUND 2"]

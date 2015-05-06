@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="tournament" schema="public" type="PostgreSQL - 9.3.6">
+   <tables>
+      <table name="matches" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('matches_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="tournament_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="matches_tournament_id_fkey" implied="false" onDeleteCascade="false" table="tournaments"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="round" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="3" name="winner" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="matches_winner_fkey" implied="false" onDeleteCascade="false" table="players"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="loser" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="matches_loser_fkey" implied="false" onDeleteCascade="false" table="players"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="matches_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="players" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('players_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="loser" foreignKey="matches_loser_fkey" implied="false" onDeleteCascade="false" table="matches"/>
+            <child column="winner" foreignKey="matches_winner_fkey" implied="false" onDeleteCascade="false" table="matches"/>
+            <child column="player_id" foreignKey="playersintournaments_player_id_fkey" implied="false" onDeleteCascade="false" table="playersintournaments"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="" size="2147483647" type="text"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="players_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="playersintournaments" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="tournament_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="playersintournaments_tournament_id_fkey" implied="false" onDeleteCascade="false" table="tournaments"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="player_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="playersintournaments_player_id_fkey" implied="false" onDeleteCascade="false" table="players"/>
+         </column>
+         <primaryKey column="tournament_id" sequenceNumberInPK="1"/>
+         <primaryKey column="player_id" sequenceNumberInPK="2"/>
+         <index name="playersintournaments_pkey" unique="true">
+            <column ascending="true" name="tournament_id"/>
+            <column ascending="true" name="player_id"/>
+         </index>
+      </table>
+      <table name="tournaments" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('tournaments_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="tournament_id" foreignKey="matches_tournament_id_fkey" implied="false" onDeleteCascade="false" table="matches"/>
+            <child column="tournament_id" foreignKey="playersintournaments_tournament_id_fkey" implied="false" onDeleteCascade="false" table="playersintournaments"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="description" nullable="false" remarks="" size="2147483647" type="text"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="tournaments_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+   </tables>
+</database>
