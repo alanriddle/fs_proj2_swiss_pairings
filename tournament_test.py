@@ -4,20 +4,20 @@
 
 from tournament import *
 
-def testDeleteMatches(tournament_id):
-    deleteMatches(tournament_id)
-    print "1. Old matches for a tournament can be deleted."
+def testDeleteMatches():
+    deleteMatches()
+    print "1. Old matches can be deleted."
 
 
-def testDelete(tournament_id):
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
-    print "2. Player records for a tournament can be deleted."
+def testDelete():
+    deleteMatches()
+    deletePlayers()
+    print "2. Player records can be deleted."
 
 
 def testCount(tournament_id):
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
+    deleteMatches()
+    deletePlayers()
     c = countPlayers(tournament_id)
     if c == '0':
         raise TypeError(
@@ -28,8 +28,8 @@ def testCount(tournament_id):
 
 
 def testRegister(tournament_id):
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
+    deleteMatches()
+    deletePlayers()
     player_id = registerPlayerInDatabase("Chandra Nalaar")
     enterPlayerInTournament(tournament_id, player_id)
 
@@ -41,8 +41,8 @@ def testRegister(tournament_id):
 
 
 def testRegisterCountDelete(tournament_id):
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
+    deleteMatches()
+    deletePlayers()
     mc = registerPlayerInDatabase("Markov Chaney")
     jm = registerPlayerInDatabase("Joe Malik")
     mt = registerPlayerInDatabase("Mao Tsu-hsi")
@@ -57,7 +57,7 @@ def testRegisterCountDelete(tournament_id):
     if c != 4:
         raise ValueError(
             "After registering four players, countPlayers should be 4.")
-    deletePlayers(tournament_id)
+    deletePlayers()
     c = countPlayers(tournament_id)
     if c != 0:
         raise ValueError("After deleting, countPlayers should return zero.")
@@ -65,8 +65,8 @@ def testRegisterCountDelete(tournament_id):
 
 
 def testStandingsBeforeMatches(tournament_id):
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
+    deleteMatches()
+    deletePlayers()
     mm = registerPlayerInDatabase("Melpomene Murray")
     rs = registerPlayerInDatabase("Randy Schwartz")
 
@@ -92,8 +92,8 @@ def testStandingsBeforeMatches(tournament_id):
 
 
 def testReportMatches(tournament_id):
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
+    deleteMatches()
+    deletePlayers()
 
     bw = registerPlayerInDatabase("Bruno Walton")
     bo = registerPlayerInDatabase("Boots O'Neal")
@@ -124,8 +124,8 @@ def testReportMatches(tournament_id):
 
 
 def testPairings(tournament_id):
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
+    deleteMatches()
+    deletePlayers()
 
     ts = registerPlayerInDatabase("Twilight Sparkle")
     fs = registerPlayerInDatabase("Fluttershy")
@@ -201,8 +201,8 @@ def testOpponentWins4Players(tournament_id):
     not counted.
     """
 
-    deleteMatches(tournament_id)
-    deletePlayers(tournament_id)
+    deleteMatches()
+    deletePlayers()
 
     ts = registerPlayerInDatabase("Twilight Sparkle")
     fs = registerPlayerInDatabase("Fluttershy")
@@ -279,8 +279,8 @@ if __name__ == '__main__':
 
     tournament_id = createTournament('Test 1 tournament')
 
-    testDeleteMatches(tournament_id)
-    testDelete(tournament_id)
+    testDeleteMatches()
+    testDelete()
     testCount(tournament_id)
     testRegister(tournament_id)
     testRegisterCountDelete(tournament_id)

@@ -25,28 +25,26 @@ def createTournament(description):
     return tournament_id
 
 
-def deleteMatches(tournament_id):
+def deleteMatches():
     """
-    Remove all the match records from the database 
-    for the specified tournament.
+    Remove all the match records from the database.
     """
     conn = connect()
     cur = conn.cursor()
-    sql = "DELETE FROM Matches WHERE tournament_id = (%s)"
-    cur.execute(sql, (tournament_id,))
+    cur.execute("DELETE FROM Matches")
     conn.commit()
     conn.close()
 
 
-def deletePlayers(tournament_id):
+def deletePlayers():
     """
-    Remove all the player records from the database
-    for the specified tournament.
+    Remove all the player records from the database -- both the records
+    in the Players table and the records in the PlayersInTournament table.
     """
     conn = connect()
     cur = conn.cursor()
-    sql = "DELETE FROM PlayersInTournaments WHERE tournament_id = (%s)"
-    cur.execute(sql, (tournament_id,))
+    cur.execute("DELETE FROM PlayersInTournaments")
+    cur.execute("DELETE FROM Players")
     conn.commit()
     conn.close()
 
